@@ -1,71 +1,122 @@
-###################
-What is CodeIgniter
-###################
+********************
+მოკლე აღწერა 
+********************
 
-CodeIgniter is an Application Development Framework - a toolkit - for people
-who build web sites using PHP. Its goal is to enable you to develop projects
-much faster than you could if you were writing code from scratch, by providing
-a rich set of libraries for commonly needed tasks, as well as a simple
-interface and logical structure to access these libraries. CodeIgniter lets
-you creatively focus on your project by minimizing the amount of code needed
-for a given task.
+- მიზანი: მარტივი users CRUD აპლიკაცია CodeIgniter 3-ზე, სუფთა არქიტექტურით და კარგი UX-ით.
 
-*******************
-Release Information
-*******************
+- არქიტექტურა (MVC)
+  - სტანდარტული CI3 სტრუქტურა: Controllers / Models / Views
+  - `MY_Controller` - საერთო ლეიაუთი და JSON ჰელფერები (`json_success`/`json_error`)
+  - `Authenticated_Controller` — ავტორიზაციის შემოწმება დაცულ გვერდებზე
 
-This repo contains in-development code for future releases. To download the
-latest stable release please visit the `CodeIgniter Downloads
-<https://codeigniter.com/download>`_ page.
+- უსაფრთხოება
+  - პაროლები: `password_hash()` / `password_verify()`
+  - სესიები: CI Session; CSRF ჩართულია (ტოკენი ავტომატურად ერთვის `assets/app.js`-ის საშუალებით)
+  - კონფიგი: `cookie_httponly = TRUE`, `sess_regenerate_destroy = TRUE`
+  - დეველოპმენტი: დროებითი პაროლი ილოგება ნაცვლად ფოსტაზე გაგზავნისა (იხ. ქვემოთ „ლოგები — დროებითი პაროლი“);
 
-**************************
-Changelog and New Features
-**************************
+- CRUD / UI (AJAX + Bootstrap)
+  - ყველა ოპერაცია AJAX-ით, მოდალებში (Create/Edit/Delete)
+  - DataTables server-side - sortable/searchable, მასშტაბირებადი სია
+  - ერთიანი API ფორმატი: `{success, message, data, errors}`
+  - საკუთარი თავის წაშლა დაბლოკილია (სერვერი + UI)
 
-You can find a list of all changes for each release in the `user
-guide change log <https://github.com/bcit-ci/CodeIgniter/blob/develop/user_guide_src/source/changelog.rst>`_.
+- სერვისები და მოდელები
+  - `User_service` - მომხმარებლის შექმნა დროებითი პაროლით და შეტყობინება
+  - `User_model` - პაგინაცია/ძიება/დათვლა DataTables-ისთვის
 
-*******************
-Server Requirements
-*******************
+- Dashboard
+  - `Total users` ითვლება `recordsTotal` ველიდან (server-side endpoint)
 
-PHP version 5.6 or newer is recommended.
+- დოკუმენტაცია / მომავალი ნაბიჯები
+  - README: გაშვება/კონფიგი/აღწერა
+  - მომავალი: მიგრაციები/სიდები
 
-It should work on 5.3.7 as well, but we strongly advise you NOT to run
-such old versions of PHP, because of potential security and performance
-issues, as well as missing features.
+**********
+მიგრაციები
+**********
 
-************
-Installation
-************
+SQL ფაილები მდებარეობს `database/` დირექტორიაში:
 
-Please see the `installation section <https://codeigniter.com/userguide3/installation/index.html>`_
-of the CodeIgniter User Guide.
+- `database/001_create_database.sql` - ქმნის `ci_app` ბაზას
+- `database/002_create_users_table.sql` - ქმნის `users` ცხრილს
+- `database/003_seed_admin.sql` - ამატებს ადმინ მომხმარებელს
+- `database/004_seed_dummy_users.sql` - ამატებს 100 მომხმარებელს
 
-*******
-License
-*******
+გაშვება (ერთხაზიანი):
 
-Please see the `license
-agreement <https://github.com/bcit-ci/CodeIgniter/blob/develop/user_guide_src/source/license.rst>`_.
+.. code-block:: bash
 
-*********
-Resources
-*********
-
--  `User Guide <https://codeigniter.com/docs>`_
--  `Contributing Guide <https://github.com/bcit-ci/CodeIgniter/blob/develop/contributing.md>`_
--  `Language File Translations <https://github.com/bcit-ci/codeigniter3-translations>`_
--  `Community Forums <http://forum.codeigniter.com/>`_
--  `Community Wiki <https://github.com/bcit-ci/CodeIgniter/wiki>`_
--  `Community Slack Channel <https://codeigniterchat.slack.com>`_
-
-Report security issues to our `Security Panel <mailto:security@codeigniter.com>`_
-or via our `page on HackerOne <https://hackerone.com/codeigniter>`_, thank you.
+   sudo mysql -u USERNAME -p PASSWORD < database/001_create_database.sql \
+     && mysql -u USERNAME -p PASSWORD < database/002_create_users_table.sql \
+     && mysql -u USERNAME -p PASSWORD < database/003_seed_admin.sql \
+     && mysql -u USERNAME -p PASSWORD < database/004_seed_dummy_users.sql
 
 ***************
-Acknowledgement
+ადმინის მონაცემები
 ***************
 
-The CodeIgniter team would like to thank EllisLab, all the
-contributors to the CodeIgniter project and you, the CodeIgniter user.
+- Email: `admin@example.com`
+- პაროლი: `password`
+
+*******************
+გაშვება ნულიდან (clone → run)
+*******************
+
+1) დეფენდენსები
+
+.. code-block:: bash
+
+   composer install
+
+2) ბაზის მომზადება (აირჩიეთ ერთ-ერთი)
+
+.. code-block:: bash
+
+   # პირდაპირ SQL-ებით
+   sudo mysql -u USERNAME -p PASSWORD < database/001_create_database.sql \
+     && mysql -u USERNAME -p PASSWORD < database/002_create_users_table.sql \
+     && mysql -u USERNAME -p PASSWORD < database/003_seed_admin.sql \
+     && mysql -u USERNAME -p PASSWORD < database/004_seed_dummy_users.sql
+
+3) კონფიგურაცია (DB + SMTP)
+
+კოპირება `env.example` ფაილისგან:
+
+.. code-block:: bash
+
+   cp env.example .env
+
+შეავსეთ თქვენი database და SMTP კრედენციალები `.env` ფაილში:
+
+.. code-block:: bash
+
+   DB_HOST=localhost
+   DB_USER=your_mysql_user
+   DB_PASS=your_mysql_password
+   DB_NAME=ci_app
+   
+   # SMTP (Mailtrap მაგალითი)
+   SMTP_HOST=sandbox.smtp.mailtrap.io
+   SMTP_PORT=2525
+   SMTP_USER=your_mailtrap_username
+   SMTP_PASS=your_mailtrap_password
+   SMTP_CRYPTO=tls
+
+4) აპლიკაციის გაშვება
+
+.. code-block:: bash
+
+   php -S localhost:8000 -t .
+
+გახსენება: Base URL არის `http://localhost:8000/index.php`
+
+***********************
+ლოგები — დროებითი პაროლი
+***********************
+
+- სად ინახება ლოგები: `application/logs/log-YYYY-MM-DD.php`
+- როდის ილოგება: როცა ადმინი ქმნის იუზერს ან იუზერი რეგისტრირდება
+- სად ხდება ლოგირება: `application/libraries/User_service.php` → `notify_temp_password()`
+  - დეველოპმენტ გარემოში (`ENVIRONMENT === 'development'`) იწერება `log_message('info', ...)`
+  - არსებული ქრედენშალებით იგზავნება ელფოსტა SMTP-ით (Mailtrap ან თქვენი SMTP-ით)
