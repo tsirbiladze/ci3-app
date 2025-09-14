@@ -173,10 +173,17 @@ class User_model extends CI_Model
     /**
      * Generate temporary password
      */
-    private function generate_temp_password($length = 10)
+    private function generate_temp_password($length = 12)
     {
-        $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-        return substr(str_shuffle($chars), 0, $length);
+        // Generate a cryptographically secure random password per user
+        $alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*_-';
+        $alphabetLength = strlen($alphabet);
+        $password = '';
+        for ($i = 0; $i < $length; $i++) {
+            $index = random_int(0, $alphabetLength - 1);
+            $password .= $alphabet[$index];
+        }
+        return $password;
     }
 
     /**

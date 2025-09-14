@@ -40,7 +40,28 @@ class User_service
             return false;
         }
 
+        // Write a dedicated log entry for new user creation only (includes temp password)
+        $this->write_user_creation_log($user_id, $name, $email, $phone, $temp_password);
+
         return array('user_id' => $user_id, 'temp_password' => $temp_password);
+    }
+
+    /**
+     * Write a dedicated log file entry for user creation events only.
+     */
+    protected function write_user_creation_log(int $user_id, string $name, string $email, string $phone, string $temp_password): void
+    {
+        $log_dir = APPPATH . 'logs/user_creation/';
+        if (!is_dir($log_dir)) {
+            @mkdir($log_dir, 0755, true);
+        }
+
+        $log_file = $log_dir . 'user_creation-' . date('Y-m-d') . '.log';
+        $timestamp = date('Y-m-d H:i:s');
+        $line = sprintf("%s | id=%d | name=%s | email=%s | phone=%s | temp_password=%s\n", $timestamp, $user_id, $name, $email, $phone, $temp_password);
+
+        // Suppress warnings if directory permissions are restricted
+        @file_put_contents($log_file, $line, FILE_APPEND | LOCK_EX);
     }
 
     /**
@@ -60,11 +81,7 @@ class User_service
 
         $this->email->message($message);
 
-        if (ENVIRONMENT === 'development') {
-            log_message('info', "Temp password email for {$to_email}: {$temp_password}");
-        } else {
-            $this->email->send();
-        }
+        $this->email->send();
     }
 
     public function update_user(int $id, array $data): bool

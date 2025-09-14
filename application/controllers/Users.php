@@ -161,11 +161,6 @@ class Users extends Authenticated_Controller
 
         $this->email->message($message);
 
-        // For development, you might want to log this instead of actually sending
-        if (ENVIRONMENT === 'development') {
-            log_message('info', "Temp password email for {$to_email}: {$temp_password}");
-        } else {
-            $this->email->send();
-        }
+        $this->email->send();
     }
 }

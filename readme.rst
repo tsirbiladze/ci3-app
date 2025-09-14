@@ -13,7 +13,7 @@
   - პაროლები: `password_hash()` / `password_verify()`
   - სესიები: CI Session; CSRF ჩართულია (ტოკენი ავტომატურად ერთვის `assets/app.js`-ის საშუალებით)
   - კონფიგი: `cookie_httponly = TRUE`, `sess_regenerate_destroy = TRUE`
-  - დეველოპმენტი: დროებითი პაროლი ილოგება ნაცვლად ფოსტაზე გაგზავნისა (იხ. ქვემოთ „ლოგები — დროებითი პაროლი“);
+  - ლოგირება: Framework-ის სტანდარტული ლოგები გამორთულია; მხოლოდ ახალი მომხმარებლის შექმნა ილოგება კასტომ ფაილში.
 
 - CRUD / UI (AJAX + Bootstrap)
   - ყველა ოპერაცია AJAX-ით, მოდალებში (Create/Edit/Delete)
@@ -47,10 +47,10 @@ SQL ფაილები მდებარეობს `database/` დირ�
 
 .. code-block:: bash
 
-   sudo mysql -u USERNAME -p PASSWORD < database/001_create_database.sql \
-     && mysql -u USERNAME -p PASSWORD < database/002_create_users_table.sql \
-     && mysql -u USERNAME -p PASSWORD < database/003_seed_admin.sql \
-     && mysql -u USERNAME -p PASSWORD < database/004_seed_dummy_users.sql
+   sudo mysql -u tornike -p < database/001_create_database.sql \
+     && mysql -u tornike -p < database/002_create_users_table.sql \
+     && mysql -u tornike -p < database/003_seed_admin.sql \
+     && mysql -u tornike -p < database/004_seed_dummy_users.sql
 
 ***************
 ადმინის მონაცემები
@@ -111,12 +111,14 @@ SQL ფაილები მდებარეობს `database/` დირ�
 
 გახსენება: Base URL არის `http://localhost:8000/index.php`
 
-***********************
-ლოგები — დროებითი პაროლი
-***********************
+***********************************
+ლოგები — ახალი მომხმარებლის შექმნა
+***********************************
 
-- სად ინახება ლოგები: `application/logs/log-YYYY-MM-DD.php`
-- როდის ილოგება: როცა ადმინი ქმნის იუზერს ან იუზერი რეგისტრირდება
-- სად ხდება ლოგირება: `application/libraries/User_service.php` → `notify_temp_password()`
-  - დეველოპმენტ გარემოში (`ENVIRONMENT === 'development'`) იწერება `log_message('info', ...)`
-  - არსებული ქრედენშალებით იგზავნება ელფოსტა SMTP-ით (Mailtrap ან თქვენი SMTP-ით)
+- Framework-ის ლოგირება გამორთულია: `application/config/config.php` → `log_threshold = 0`
+- მხოლოდ ახალი მომხმარებლის შექმნისას იწერება ჩანაწერი კასტომ ლოგში:
+  - ფაილი: `application/logs/user_creation/user_creation-YYYY-MM-DD.log`
+  - ფორმატი: `YYYY-MM-DD HH:MM:SS | id=<ID> | name=<NAME> | email=<EMAIL> | phone=<PHONE> | temp_password=<TEMP>`
+  - შენიშვნა: დროებითი პაროლი ილოგება მოთხოვნით; გამოიყენეთ მხოლოდ უსაფრთხო გარემოში
+- იმპლემენტაცია: `application/libraries/User_service.php` → `write_user_creation_log()`
+- ელფოსტა ყოველთვის იგზავნება SMTP-ით; `log_message()` აღარ გამოიყენება დროებითი პაროლის დასალოგად.
