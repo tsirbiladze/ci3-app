@@ -268,30 +268,16 @@ switch (ENVIRONMENT)
 
 	define('APPPATH', $application_folder.DIRECTORY_SEPARATOR);
 
-	// Load environment variables from .env file
+	// Load environment variables from .env using vlucas/phpdotenv
 	if (file_exists(FCPATH.'.env')) {
-		$lines = file(FCPATH.'.env', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-		foreach ($lines as $line) {
-			// Skip comments and empty lines
-			if (strpos(trim($line), '#') === 0 || empty(trim($line))) {
-				continue;
-			}
-			// Parse the line
-			if (strpos($line, '=') !== false) {
-				list($key, $value) = explode('=', $line, 2);
-				$key = trim($key);
-				$value = trim($value);
-				// Remove quotes if present
-				if ((substr($value, 0, 1) == '"' && substr($value, -1) == '"') ||
-					(substr($value, 0, 1) == "'" && substr($value, -1) == "'")) {
-					$value = substr($value, 1, -1);
-				}
-				// Set the environment variable if not already set
-				if (!getenv($key)) {
-					putenv("$key=$value");
-					$_ENV[$key] = $value;
-					$_SERVER[$key] = $value;
-				}
+		// Prefer Composer's autoload
+		$composerAutoload = FCPATH.'vendor/autoload.php';
+		if (file_exists($composerAutoload)) {
+			require_once $composerAutoload;
+			if (class_exists('Dotenv\\Dotenv')) {
+				// Use createUnsafeImmutable so values are available via getenv()
+				$dotenv = Dotenv\Dotenv::createUnsafeImmutable(FCPATH);
+				$dotenv->safeLoad();
 			}
 		}
 	}

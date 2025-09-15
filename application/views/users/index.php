@@ -104,9 +104,9 @@
                     orderable: false,
                     render: r => {
                         const canDelete = Number(r.id) !== Number(CURRENT_USER_ID);
-                        const delBtn = canDelete
-                            ? `<button class="btn btn-outline-danger delete" data-id="${r.id}">Delete</button>`
-                            : `<button class="btn btn-outline-danger" disabled title="Cannot delete your own account">Delete</button>`;
+                        const delBtn = canDelete ?
+                            `<button class="btn btn-outline-danger delete" data-id="${r.id}">Delete</button>` :
+                            `<button class="btn btn-outline-danger" disabled title="Cannot delete your own account">Delete</button>`;
                         return `<div class="btn-group btn-group-sm">
                             <button class="btn btn-outline-secondary edit" data-id="${r.id}">Edit</button>
                             ${delBtn}
@@ -122,8 +122,23 @@
                 .done(r => {
                     r && r.success ? (toast('User created', 'success'), $('#addUserModal').modal('hide'), dt.ajax.reload()) : toast((r && r.message) || 'Failed', 'danger');
                 })
-                .fail(xhr => { let m='Network error'; try{var j=JSON.parse(xhr.responseText||'{}'); if(j.message) m=j.message;}catch(e){} toast(m,'danger'); })
+                .fail(xhr => {
+                    let m = 'Network error';
+                    try {
+                        var j = JSON.parse(xhr.responseText || '{}');
+                        if (j.message) m = j.message;
+                    } catch (e) {}
+                    toast(m, 'danger');
+                })
                 .always(() => $b.prop('disabled', false).text('Save'));
+        });
+
+        // Ensure Add modal form is cleared after close and before open
+        $('#addUserModal').on('hidden.bs.modal show.bs.modal', function() {
+            const f = document.getElementById('addUserForm');
+            if (f) {
+                f.reset();
+            }
         });
 
         $(document).on('click', '.edit', function() {
@@ -145,8 +160,23 @@
                 .done(r => {
                     r && r.success ? (toast('User updated', 'success'), $('#editUserModal').modal('hide'), dt.ajax.reload()) : toast((r && r.message) || 'Failed', 'danger');
                 })
-                .fail(xhr => { let m='Network error'; try{var j=JSON.parse(xhr.responseText||'{}'); if(j.message) m=j.message;}catch(e){} toast(m,'danger'); })
+                .fail(xhr => {
+                    let m = 'Network error';
+                    try {
+                        var j = JSON.parse(xhr.responseText || '{}');
+                        if (j.message) m = j.message;
+                    } catch (e) {}
+                    toast(m, 'danger');
+                })
                 .always(() => $b.prop('disabled', false).text('Update'));
+        });
+
+        // Clear Edit modal form on close to avoid stale data on next open
+        $('#editUserModal').on('hidden.bs.modal', function() {
+            const f = document.getElementById('editUserForm');
+            if (f) {
+                f.reset();
+            }
         });
 
         $(document).on('click', '.delete', function() {
@@ -163,20 +193,35 @@
                         .done(r => {
                             r && r.success ? (toast('User deleted', 'success'), dt.ajax.reload()) : toast((r && r.message) || 'Failed', 'danger');
                         })
-                        .fail(xhr => { let m='Network error'; try{var j=JSON.parse(xhr.responseText||'{}'); if(j.message) m=j.message;}catch(e){} toast(m,'danger'); });
+                        .fail(xhr => {
+                            let m = 'Network error';
+                            try {
+                                var j = JSON.parse(xhr.responseText || '{}');
+                                if (j.message) m = j.message;
+                            } catch (e) {}
+                            toast(m, 'danger');
+                        });
                 });
         });
     }
 
     (function waitForjQuery() {
-        if (!window.jQuery) { return setTimeout(waitForjQuery, 30); }
+        if (!window.jQuery) {
+            return setTimeout(waitForjQuery, 30);
+        }
         // Load DataTables after jQuery is ready
         $.getScript('https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js')
             .done(function() {
                 $.getScript('https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js')
-                    .done(function() { initUsersPage(); })
-                    .fail(function() { toast('Failed to load DataTables (bootstrap5).', 'danger'); });
+                    .done(function() {
+                        initUsersPage();
+                    })
+                    .fail(function() {
+                        toast('Failed to load DataTables (bootstrap5).', 'danger');
+                    });
             })
-            .fail(function() { toast('Failed to load DataTables.', 'danger'); });
+            .fail(function() {
+                toast('Failed to load DataTables.', 'danger');
+            });
     })();
 </script>
