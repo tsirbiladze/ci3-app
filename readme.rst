@@ -121,4 +121,5 @@ SQL ფაილები მდებარეობს `database/` დირ�
   - ფორმატი: `YYYY-MM-DD HH:MM:SS | id=<ID> | name=<NAME> | email=<EMAIL> | phone=<PHONE> | temp_password=<TEMP>`
   - შენიშვნა: დროებითი პაროლი ილოგება მოთხოვნით; გამოიყენეთ მხოლოდ უსაფრთხო გარემოში
 - იმპლემენტაცია: `application/libraries/User_service.php` → `write_user_creation_log()`
-- ელფოსტა ყოველთვის იგზავნება SMTP-ით; `log_message()` აღარ გამოიყენება დროებითი პაროლის დასალოგად.
+- ელფოსტა ყოველთვის იგზავნება SMTP-ით; 
+- ელფოსტის გატესტვა შეგიძლიათ Mailtrap-ის სერვისის საშუალებით, როდესაც შეხვალთ და შექმნით sandbox-ს Code Samples სექციაში აირჩიეთ CodeIgniter და მონაცემები დააკპირეთ .env ფაილში.
